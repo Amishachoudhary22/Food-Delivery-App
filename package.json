@@ -9,14 +9,31 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/mongodb-adapter": "^3.7.4",
+    "@aws-sdk/client-s3": "^3.735.0",
+    "@stripe/stripe-js": "^5.5.0",
+    "bcrypt": "^5.1.1",
+    "classnames": "^2.5.1",
+    "connect-mongo": "^5.1.0",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "framer-motion": "^12.0.5",
+    "mongodb": "^6.12.0",
+    "mongoose": "^8.9.5",
+    "next": "^14.2.20",
+    "next-auth": "^4.24.7",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.5"
+    "react-hot-toast": "^2.5.1",
+    "stripe": "^17.5.0",
+    "uniqid": "^5.4.0",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8",
-    "eslint-config-next": "14.2.5"
+    "eslint-config-next": "14.2.5",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16"
   }
 }

@@ -4,28 +4,27 @@ import Left from "@/components/icons/Left";
 import EditableImage from "@/components/layout/EditableImage";
 import MenuItemForm from "@/components/layout/MenuItemForm";
 import UserTabs from "@/components/layout/UserTabs";
-import {useProfile} from "@/components/UseProfile";
+import { useProfile } from "@/components/UseProfile";
 import Link from "next/link";
-import {redirect, useParams} from "next/navigation";
-import {useEffect, useState} from "react";
+import { useParams, redirect } from "next/navigation";  // Use Next.js 13's navigation module for dynamic routing
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function EditMenuItemPage() {
-
-  const {id} = useParams();
+  const { id } = useParams();  // id will automatically come from the route
 
   const [menuItem, setMenuItem] = useState(null);
   const [redirectToItems, setRedirectToItems] = useState(false);
-  const {loading, data} = useProfile();
+  const { loading, data } = useProfile();
 
   useEffect(() => {
     fetch('/api/menu-items').then(res => {
       res.json().then(items => {
-        const item = items.find(i => i._id === id);
+        const item = items.find(i => i._id === id);  // Find the menu item by its ID
         setMenuItem(item);
       });
     })
-  }, []);
+  }, [id]);
 
   async function handleFormSubmit(ev, data) {
     ev.preventDefault();

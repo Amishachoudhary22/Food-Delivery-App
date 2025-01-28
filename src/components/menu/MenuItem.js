@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { CartContext } from "@/components/AppContext";
 import MenuItemTile from "@/components/menu/MenuItemTile";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import { useContext, useState } from "react";
 import toast from "react-hot-toast";
 

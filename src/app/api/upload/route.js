@@ -1,41 +1,36 @@
-import {PutObjectCommand, S3Client} from "@aws-sdk/client-s3";
-import uniqid from 'uniqid';
+import { NextResponse } from "next/server";
+import path from "path";
+import fs from "fs/promises";
+import { v4 as uuidv4 } from "uuid";
 
-export async function POST(req) {
-  const data =  await req.formData();
-  if (data.get('file')) {
-    // upload the file
-    const file = data.get('file');
+export const POST = async (req) => {
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file");
 
-    const s3Client = new S3Client({
-      region: 'ap-south-1',
-      credentials: {
-        accessKeyId: process.env.MY_AWS_ACCESS_KEY,
-        secretAccessKey: process.env.MY_AWS_SECRET_KEY,
-      },
-    });
-
-    const ext = file.name.split('.').slice(-1)[0];
-    const newFileName = uniqid() + '.' + ext;
-
-    const chunks = [];
-    for await (const chunk of file.stream()) {
-      chunks.push(chunk);
+    if (!file) {
+      return NextResponse.json({ error: "No file received" }, { status: 400 });
     }
-    const buffer = Buffer.concat(chunks);
 
-    const bucket = 'Amisha-food-ordering';
-    await s3Client.send(new PutObjectCommand({
-      Bucket: bucket,
-      Key: newFileName,
-      ACL: 'public-read',
-      ContentType: file.type,
-      Body: buffer,
-    }));
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
+    }
 
+    const filename = `${uuidv4()}-${file.name.replace(/\s+/g, "_")}`;
+    const uploadDir = path.join(process.cwd(), "public/uploads");
 
-    const link = 'https://'+bucket+'.s3.amazonaws.com/'+newFileName;
-    return Response.json(link);
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await fs.writeFile(path.join(uploadDir, filename), buffer);
+
+    const fileUrl = `/uploads/${filename}`;
+    return NextResponse.json({ message: "Success", data: fileUrl, status: 201 });
+  } catch (error) {
+    console.error("Error occurred:", error);
+    return NextResponse.json({ error: "Failed to upload file", status: 500 });
   }
-  return Response.json(true);
-}
+};
+
+

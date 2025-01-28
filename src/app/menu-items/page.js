@@ -2,7 +2,7 @@
 import Right from "@/components/icons/Right";
 import UserTabs from "@/components/layout/UserTabs";
 import {useProfile} from "@/components/UseProfile";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import Link from "next/link";
 import {useEffect, useState} from "react";
 
@@ -34,7 +34,7 @@ export default function MenuItemsPage() {
         <Link
           className="button flex"
           href={'/menu-items/new'}>
-          <span>Crete new menu item</span>
+          <span>Create new menu item</span>
           <Right />
         </Link>
       </div>

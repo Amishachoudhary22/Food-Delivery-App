@@ -1,8 +1,8 @@
-import {cartProductPrice} from "@/components/AppContext";
+import { cartProductPrice } from "@/components/AppContext";
 import Trash from "@/components/icons/Trash";
-import Image from "next/image";
+import Image from "next/legacy/image";
 
-export default function CartProduct({product,onRemove}) {
+export default function CartProduct({ product, index, onRemove }) { // Include `index` as a prop
   return (
     <div className="flex items-center gap-4 border-b py-4">
       <div className="w-24">
@@ -19,7 +19,7 @@ export default function CartProduct({product,onRemove}) {
         )}
         {product.extras?.length > 0 && (
           <div className="text-sm text-gray-500">
-            {product.extras.map(extra => (
+            {product.extras.map((extra) => (
               <div key={extra.name}>{extra.name} ${extra.price}</div>
             ))}
           </div>
@@ -32,8 +32,9 @@ export default function CartProduct({product,onRemove}) {
         <div className="ml-2">
           <button
             type="button"
-            onClick={() => onRemove(index)}
-            className="p-2">
+            onClick={() => onRemove(index)} // Use the index passed as a prop
+            className="p-2"
+          >
             <Trash />
           </button>
         </div>

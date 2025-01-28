@@ -5,7 +5,7 @@ import SuccessBox from "@/components/layout/SuccessBox";
 import UserForm from "@/components/layout/UserForm";
 import UserTabs from "@/components/layout/UserTabs";
 import {useSession} from "next-auth/react";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import Link from "next/link";
 import {redirect} from "next/navigation";
 import {useEffect, useState} from "react";

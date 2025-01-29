@@ -12,21 +12,21 @@ export default function OrderPage() {
   const [loadingOrder, setLoadingOrder] = useState(true);
   const {id} = useParams();
   useEffect(() => {
-    if (typeof window.console !== "undefined") {
-      if (window.location.href.includes('clear-cart=1')) {
-        clearCart();
-      }
+  if (typeof window.console !== "undefined") {
+    if (window.location.href.includes('clear-cart=1')) {
+      clearCart();
     }
-    if (id) {
-      setLoadingOrder(true);
-      fetch('/api/orders?_id='+id).then(res => {
-        res.json().then(orderData => {
-          setOrder(orderData);
-          setLoadingOrder(false);
-        });
-      })
-    }
-  }, [clearCart, id]);
+  }
+  if (id) {
+    setLoadingOrder(true);
+    fetch('/api/orders?_id='+id).then(res => {
+      res.json().then(orderData => {
+        setOrder(orderData);
+        setLoadingOrder(false);
+      });
+    })
+  }
+}, [clearCart, id]);
 
   let subtotal = 0;
   if (order?.cartProducts) {

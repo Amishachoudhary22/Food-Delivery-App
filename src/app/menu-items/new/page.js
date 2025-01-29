@@ -17,17 +17,16 @@ export default function NewMenuItemPage() {
 
   async function handleFormSubmit(ev, data) {
     ev.preventDefault();
-    const updatedData = {...data, basePrice: parseFloat(data.basePrice)}
     const savingPromise = new Promise(async (resolve, reject) => {
       const response = await fetch('/api/menu-items', {
         method: 'POST',
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(data),
         headers: { 'Content-Type': 'application/json' },
       });
       if (response.ok)
         resolve();
       else
-        reject(await response.text());
+        reject();
     });
 
     await toast.promise(savingPromise, {

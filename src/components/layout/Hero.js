@@ -1,6 +1,6 @@
 import Right from "@/components/icons/Right";
 import Image from "next/legacy/image";
-
+import Link from "next/link";
 export default function Hero() {
   return (
     <section className="hero md:mt-4">
@@ -17,10 +17,14 @@ export default function Hero() {
         Food is the key ingredient that can turn an ordinary day into something extraordinary
         </p>
         <div className="flex gap-4 text-sm">
-          <button className="flex justify-center bg-primary uppercase items-center gap-2 text-white px-4 py-2 rounded-full">
-            Order now
-            <Right />
-          </button>
+        <Link 
+            href="/menu" 
+            className="bg-primary text-white px-6 py-1 rounded-full flex items-center justify-center" 
+          > 
+            <span className="uppercase font-semibold">ORDER</span> 
+            <span className="uppercase font-semibold ml-2">NOW</span> 
+            <Right /> 
+          </Link> 
           <button className="flex items-center border-0 gap-2 py-2 text-gray-600 font-semibold">
             Learn more
             <Right />

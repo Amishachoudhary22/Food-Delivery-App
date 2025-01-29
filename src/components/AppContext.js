@@ -35,36 +35,85 @@ export function AppProvider({children}) {
   }
 
   function removeCartProduct(indexToRemove) {
-    setCartProducts(prevCartProducts => {
-      const newCartProducts = prevCartProducts
-        .filter((v,index) => index !== indexToRemove);
-      saveCartProductsToLocalStorage(newCartProducts);
-      return newCartProducts;
+    const removedProduct = cartProducts[indexToRemove]; // Get the product before the state change
+  
+    setCartProducts((prevProducts) => {
+      const updatedProducts = prevProducts
+        .map((product, index) =>
+          index === indexToRemove
+            ? { ...product, quantity: product.quantity - 1 }
+            : product
+        )
+        .filter((product) => product.quantity > 0);
+  
+      saveCartProductsToLocalStorage(updatedProducts);
+      return updatedProducts;
     });
-    toast.success('Product removed');
+  
+    // Trigger toast outside of `setCartProducts` to ensure a single notification
+    if (removedProduct?.quantity <= 1) {
+      toast.success("Product removed from cart");
+    } else {
+      toast.success("Product quantity updated");
+    }
   }
-
+  
+  
+  
   function saveCartProductsToLocalStorage(cartProducts) {
     if (ls) {
       ls.setItem('cart', JSON.stringify(cartProducts));
     }
   }
 
-  function addToCart(product, size=null, extras=[]) {
-    setCartProducts(prevProducts => {
-      const cartProduct = {...product, size, extras};
-      const newProducts = [...prevProducts, cartProduct];
-      saveCartProductsToLocalStorage(newProducts);
-      return newProducts;
+  function addToCart(product, size, extras) {
+    setCartProducts((prevProducts) => {
+      const existingProductIndex = prevProducts.findIndex(
+        (p) =>
+          p.name === product.name &&
+          p.size?.name === size?.name &&
+          p.extras?.toString() === extras?.toString()
+      );
+  
+      if (existingProductIndex !== -1) {
+        return prevProducts.map((p, index) =>
+          index === existingProductIndex
+            ? { ...p, quantity: p.quantity + 1 }
+            : p
+        );
+      } else {
+        const cartProduct = { ...product, size, extras, quantity: 1 };
+        const newProducts = [...prevProducts, cartProduct];
+        saveCartProductsToLocalStorage(newProducts);
+        return newProducts;
+      }
     });
   }
 
+  function updateCartProductQuantity(index, newQuantity) {
+    if (newQuantity < 1) {
+      return; // Handle invalid quantity (optional: display error message)
+    }
+
+    setCartProducts((prevProducts) => {
+      const updatedProducts = [...prevProducts];
+      updatedProducts[index].quantity = newQuantity;
+      saveCartProductsToLocalStorage(updatedProducts);
+      return updatedProducts;
+    });
+  }
   return (
     <SessionProvider>
-      <CartContext.Provider value={{
-        cartProducts, setCartProducts,
-        addToCart, removeCartProduct, clearCart,
-      }}>
+      <CartContext.Provider
+        value={{
+          cartProducts,
+          setCartProducts,
+          addToCart,
+          removeCartProduct,
+          clearCart,
+          updateCartProductQuantity,
+        }}
+      >
         {children}
       </CartContext.Provider>
     </SessionProvider>

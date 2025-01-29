@@ -47,3 +47,6 @@ div.tabs > *.active{
 .flying-button-parent button{
     @apply border-primary bg-primary text-white rounded-full;
 }
+.button-primary {
+    @apply bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600; 
+  }

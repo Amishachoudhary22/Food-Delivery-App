@@ -9,7 +9,7 @@ import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CartPage() {
-  const { cartProducts, removeCartProduct } = useContext(CartContext);
+  const { cartProducts, removeCartProduct, updateCartProductQuantity } = useContext(CartContext);
   const [address, setAddress] = useState({});
   const { data: profileData } = useProfile();
 
@@ -35,10 +35,16 @@ export default function CartPage() {
     }
   }, [profileData]);
 
+  // Define `handleUpdateQuantity` here
+  const handleUpdateQuantity = (index, newQuantity) => {
+    updateCartProductQuantity(index, newQuantity);
+  };
+
   let subtotal = 0;
-  for (const p of cartProducts) {
-    subtotal += cartProductPrice(p);
-  }
+for (const p of cartProducts) {
+  subtotal += cartProductPrice(p) * p.quantity; // Include quantity in the calculation
+}
+
 
   function handleAddressChange(propName, value) {
     setAddress(prevAddress => ({ ...prevAddress, [propName]: value }));
@@ -92,7 +98,9 @@ export default function CartPage() {
             <CartProduct
               key={index}
               product={product}
+              index={index}
               onRemove={() => removeCartProduct(index)} // Pass `index` to `removeCartProduct`
+              updateQuantity={handleUpdateQuantity} // Pass handleUpdateQuantity here
             />
           ))}
           <div className="py-2 pr-16 flex justify-end items-center">

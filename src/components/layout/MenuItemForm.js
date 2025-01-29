@@ -24,6 +24,18 @@ export default function MenuItemForm({onSubmit,menuItem}) {
       });
     });
   }, []);
+  // MenuItemForm.js
+const handleSubmit = (ev, data) => {
+  ev.preventDefault();
+
+  if (!data.category) {
+    
+    alert("Please select a category."); 
+    return; 
+  }
+
+  
+};
 
   return (
     <form

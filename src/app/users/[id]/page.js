@@ -17,7 +17,7 @@ export default function EditUserPage() {
         setUser(user);
       });
     })
-  }, []);
+  }, [id]);
 
   async function handleSaveButtonClick(ev, data) {
     ev.preventDefault();

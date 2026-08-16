@@ -1,29 +1,149 @@
-import {Order} from "@/models/Order";
+import { Order } from "@/models/Order";
+import mongoose from "mongoose";
+import Stripe from "stripe";
 
-const stripe = require('stripe')(process.env.STRIPE_SK);
+const stripe = new Stripe(process.env.STRIPE_SK);
+
+async function connectDB() {
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(process.env.MONGO_URL);
+  }
+}
 
 export async function POST(req) {
-  const sig = req.headers.get('stripe-signature');
-  let event;
-
   try {
-    const reqBuffer = await req.text();
-    const signSecret = process.env.STRIPE_SIGN_SECRET;
-    event = stripe.webhooks.constructEvent(reqBuffer, sig, signSecret);
-  } catch (e) {
-    console.error('stripe error');
-    console.log(e);
-    return Response.json(e, {status: 400});
-  }
+    const signature =
+      req.headers.get("stripe-signature");
 
-  if (event.type === 'checkout.session.completed') {
-    console.log(event);
-    const orderId = event?.data?.object?.metadata?.orderId;
-    const isPaid = event?.data?.object?.payment_status === 'paid';
-    if (isPaid) {
-      await Order.updateOne({_id:orderId}, {paid:true});
+    if (!signature) {
+      return Response.json(
+        {
+          error: "Missing Stripe signature.",
+        },
+        {
+          status: 400,
+        }
+      );
     }
-  }
 
-  return Response.json('ok', {status: 200});
+    const webhookSecret =
+      process.env.STRIPE_SIGN_SECRET;
+
+    if (!webhookSecret) {
+      console.error(
+        "STRIPE_SIGN_SECRET is missing."
+      );
+
+      return Response.json(
+        {
+          error:
+            "Stripe webhook secret is not configured.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    /*
+     * IMPORTANT:
+     * We must use the raw request body for
+     * Stripe signature verification.
+     */
+    const rawBody = await req.text();
+
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        webhookSecret
+      );
+    } catch (error) {
+      console.error(
+        "STRIPE WEBHOOK SIGNATURE ERROR:",
+        error.message
+      );
+
+      return Response.json(
+        {
+          error: "Invalid Stripe webhook signature.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    console.log(
+      "STRIPE WEBHOOK:",
+      event.type
+    );
+
+    /*
+     * Payment completed
+     */
+    if (
+      event.type ===
+      "checkout.session.completed"
+    ) {
+      const checkoutSession =
+        event.data.object;
+
+      const orderId =
+        checkoutSession?.metadata?.orderId;
+
+      const paymentStatus =
+        checkoutSession?.payment_status;
+
+      if (!orderId) {
+        console.error(
+          "Stripe webhook: orderId missing."
+        );
+
+        return Response.json({
+          received: true,
+        });
+      }
+
+      if (paymentStatus === "paid") {
+        await connectDB();
+
+        await Order.updateOne(
+          {
+            _id: orderId,
+          },
+          {
+            $set: {
+              paid: true,
+            },
+          }
+        );
+
+        console.log(
+          `Order ${orderId} marked as PAID`
+        );
+      }
+    }
+
+    return Response.json({
+      received: true,
+    });
+
+  } catch (error) {
+    console.error(
+      "STRIPE WEBHOOK ERROR:",
+      error
+    );
+
+    return Response.json(
+      {
+        error: "Webhook processing failed.",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }

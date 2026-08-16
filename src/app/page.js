@@ -11,7 +11,7 @@ export default function Home() {
       <Hero />
       <HomeMenu />
       <div className="mt-16"> {/* Add some space before the "Our Story" section */}
-        <section>
+        <section id="about">
           <SectionHeaders 
             subHeader={"Our Story"}
             mainHeader={"About us"}
@@ -26,7 +26,7 @@ export default function Home() {
           </div>
         </section>
       </div>
-      <section className="text-center my-8">
+      <section id="contact" className="text-center my-8">
         <SectionHeaders 
           subHeader={"Don\'t hesitate"}
           mainHeader={"Contact us"}

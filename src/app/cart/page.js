@@ -9,17 +9,25 @@ import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CartPage() {
-  const { cartProducts, removeCartProduct, updateCartProductQuantity } = useContext(CartContext);
+  const { cartProducts, removeCartProduct, updateCartProductQuantity, clearCart } = useContext(CartContext);
   const [address, setAddress] = useState({});
   const { data: profileData } = useProfile();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (window.location.href.includes('canceled=1')) {
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get('canceled') === '1') {
         toast.error('Payment failed 😔');
       }
+
+      // If Stripe/payment flow ever returns directly to the cart after a
+      // successful payment, make sure the cart is cleared immediately.
+      if (params.get('payment') === 'success' || params.get('clear-cart') === '1') {
+        clearCart();
+      }
     }
-  }, []);
+  }, [clearCart]);
 
   useEffect(() => {
     if (profileData?.city) {
@@ -51,32 +59,46 @@ for (const p of cartProducts) {
   }
 
   async function proceedToCheckout(ev) {
-    ev.preventDefault();
+  ev.preventDefault();
 
-    const promise = new Promise((resolve, reject) => {
-      fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          address,
-          cartProducts,
-        }),
-      }).then(async (response) => {
-        if (response.ok) {
-          resolve();
-          window.location = await response.json();
-        } else {
-          reject();
-        }
-      });
-    });
+  const promise = fetch("/api/checkout", {
+    method: "POST",
 
-    await toast.promise(promise, {
-      loading: 'Preparing your order...',
-      success: 'Redirecting to payment...',
-      error: 'Something went wrong... Please try again later',
-    });
-  }
+    headers: {
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify({
+      address,
+      cartProducts,
+    }),
+  }).then(async (response) => {
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error ||
+        "Unable to start checkout."
+      );
+    }
+
+    if (!data?.url) {
+      throw new Error(
+        "Stripe checkout URL was not returned."
+      );
+    }
+
+    window.location.href = data.url;
+  });
+
+  await toast.promise(promise, {
+    loading: "Preparing your order...",
+    success: "Redirecting to payment...",
+    error: (error) =>
+      error?.message ||
+      "Something went wrong. Please try again.",
+  });
+}
 
   if (cartProducts?.length === 0) {
     return (

@@ -1,5 +1,5 @@
 import AddToCartButton from "@/components/menu/AddToCartButton";
-
+import Image from "next/image";
 export default function MenuItemTile({ onAddToCart, ...item }) {
   const {
     image,
@@ -20,10 +20,12 @@ export default function MenuItemTile({ onAddToCart, ...item }) {
       transition-all flex flex-col h-full"
     >
       <div className="w-24 h-24 rounded-md overflow-hidden mx-auto mb-2 shrink-0">
-        <img
+        <Image
           src={image}
           className="object-cover w-full h-full"
           alt={name}
+          width={96}
+          height={96}
         />
       </div>
 

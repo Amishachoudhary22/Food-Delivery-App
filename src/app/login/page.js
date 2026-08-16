@@ -140,7 +140,7 @@ export default function LoginPage() {
         </button>
 
         <div className="text-center mt-6">
-          <span>Don't have an account? </span>
+          <span>Don&apos;t have an account? </span>
 
           <Link
             href="/register"

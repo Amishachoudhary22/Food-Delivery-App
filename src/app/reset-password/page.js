@@ -1,29 +1,22 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token");
   const email = searchParams.get("email");
 
-  const [password, setPassword] =
-    useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const [message, setMessage] =
-    useState("");
-
-  const [error, setError] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(ev) {
     ev.preventDefault();
@@ -32,9 +25,7 @@ export default function ResetPasswordPage() {
     setError("");
 
     if (!token || !email) {
-      setError(
-        "Invalid password reset link."
-      );
+      setError("Invalid password reset link.");
       return;
     }
 
@@ -46,9 +37,7 @@ export default function ResetPasswordPage() {
     }
 
     if (password !== confirmPassword) {
-      setError(
-        "Passwords do not match."
-      );
+      setError("Passwords do not match.");
       return;
     }
 
@@ -136,9 +125,7 @@ export default function ResetPasswordPage() {
           value={confirmPassword}
           disabled={loading}
           onChange={(ev) =>
-            setConfirmPassword(
-              ev.target.value
-            )
+            setConfirmPassword(ev.target.value)
           }
           required
         />
@@ -164,5 +151,25 @@ export default function ResetPasswordPage() {
         )}
       </form>
     </section>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="mt-8">
+          <h1 className="text-center text-primary text-4xl mb-4">
+            Reset Password
+          </h1>
+
+          <p className="text-center">
+            Loading...
+          </p>
+        </section>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

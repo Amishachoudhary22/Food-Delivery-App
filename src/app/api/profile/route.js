@@ -6,23 +6,71 @@ import {getServerSession} from "next-auth";
 
 export async function PUT(req) {
   mongoose.connect(process.env.MONGO_URL);
+
   const data = await req.json();
-  const {_id, name, image, ...otherUserInfo} = data;
+
+  const {
+    _id,
+    name,
+    image,
+    ...otherUserInfo
+  } = data;
 
   let filter = {};
+
   if (_id) {
-    filter = {_id};
+    filter = { _id };
   } else {
-    const session = await getServerSession(authOptions);
-    const email = session.user.email;
-    filter = {email};
+    const session =
+      await getServerSession(authOptions);
+
+    const email =
+      session?.user?.email
+        ?.toLowerCase()
+        .trim();
+
+    if (!email) {
+      return Response.json(
+        { error: "Not authenticated." },
+        { status: 401 }
+      );
+    }
+
+    filter = { email };
   }
 
   const user = await User.findOne(filter);
-  await User.updateOne(filter, {name, image});
-  await UserInfo.findOneAndUpdate({email:user.email}, otherUserInfo, {upsert:true});
 
-  return Response.json(true);
+  if (!user) {
+    return Response.json(
+      { error: "User not found." },
+      { status: 404 }
+    );
+  }
+
+  await User.updateOne(
+    filter,
+    {
+      name,
+      image,
+    }
+  );
+
+  await UserInfo.findOneAndUpdate(
+    { email: user.email },
+    otherUserInfo,
+    {
+      upsert: true,
+    }
+  );
+
+  const updatedUser =
+    await User.findOne(filter).lean();
+
+  return Response.json({
+    success: true,
+    user: updatedUser,
+  });
 }
 
 export async function GET(req) {
